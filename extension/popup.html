@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HintAI Settings</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 320px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1e1e1e;
+            color: #e5e7eb;
+            padding: 16px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #3c3c3c;
+        }
+
+        .logo {
+            font-size: 28px;
+        }
+
+        h1 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            background: #252525;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            font-size: 13px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #666;
+        }
+
+        .status-dot.connected {
+            background: #10b981;
+        }
+
+        .status-dot.disconnected {
+            background: #ef4444;
+        }
+
+        .section {
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #9ca3af;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #2d2d2d;
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            font-size: 14px;
+            color: #e5e7eb;
+        }
+
+        .setting-description {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 2px;
+        }
+
+        .toggle {
+            position: relative;
+            width: 44px;
+            height: 24px;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #3c3c3c;
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #3b82f6;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(20px);
+        }
+
+        .button {
+            width: 100%;
+            padding: 10px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .button:hover {
+            background: #2563eb;
+        }
+
+        .button.secondary {
+            background: #374151;
+        }
+
+        .button.secondary:hover {
+            background: #4b5563;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .stat-box {
+            padding: 12px;
+            background: #252525;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+
+        .footer {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #3c3c3c;
+            text-align: center;
+        }
+
+        .footer a {
+            color: #3b82f6;
+            text-decoration: none;
+            font-size: 12px;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">💡</div>
+        <h1>HintAI</h1>
+    </div>
+
+    <div class="status">
+        <div class="status-dot" id="status-indicator"></div>
+        <span id="status-text">Checking connection...</span>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Settings</div>
+
+        <div class="setting-item">
+            <div>
+                <div class="setting-label">Enable HintAI</div>
+                <div class="setting-description">Turn hints on/off</div>
+            </div>
+            <label class="toggle">
+                <input type="checkbox" id="enabled-toggle" checked>
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+
+        <div class="setting-item">
+            <div>
+                <div class="setting-label">Auto-Analyze</div>
+                <div class="setting-description">Analyze as you type</div>
+            </div>
+            <label class="toggle">
+                <input type="checkbox" id="auto-toggle" checked>
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <div class="section">
+        <button class="button" id="analyze-now">Analyze Current Code</button>
+    </div>
+
+    <div class="section">
+        <button class="button secondary" id="test-connection">Test Backend Connection</button>
+    </div>
+
+    <div class="stats">
+        <div class="stat-box">
+            <div class="stat-value" id="hints-count">0</div>
+            <div class="stat-label">Hints Given</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value" id="problems-count">0</div>
+            <div class="stat-label">Problems Solved</div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <a href="https://github.com/ryleymao/HintAI" target="_blank">GitHub</a> •
+        <a href="#" id="help-link">Help</a>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

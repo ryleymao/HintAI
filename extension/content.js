@@ -61,9 +61,12 @@ class HintAIClient {
         sidebar.className = 'hintai-sidebar';
 
         sidebar.innerHTML = `
-            <div class="hintai-header">
+            <div class="hintai-header" id="hintai-header">
                 <h3>💡 HintAI</h3>
-                <button id="hintai-toggle" class="hintai-toggle">−</button>
+                <div class="hintai-header-controls">
+                    <button id="hintai-minimize" class="hintai-toggle" title="Minimize">_</button>
+                    <button id="hintai-toggle" class="hintai-toggle" title="Collapse">−</button>
+                </div>
             </div>
             <div class="hintai-content" id="hintai-content">
                 <div class="hintai-status">
@@ -78,12 +81,66 @@ class HintAIClient {
         document.body.appendChild(sidebar);
         this.sidebarElement = sidebar;
 
+        // Make draggable
+        this.makeDraggable(sidebar);
+
         // Toggle collapse
-        document.getElementById('hintai-toggle').addEventListener('click', () => {
+        document.getElementById('hintai-toggle').addEventListener('click', (e) => {
+            e.stopPropagation();
             const content = document.getElementById('hintai-content');
             const isCollapsed = content.style.display === 'none';
             content.style.display = isCollapsed ? 'block' : 'none';
             document.getElementById('hintai-toggle').textContent = isCollapsed ? '−' : '+';
+        });
+
+        // Minimize to circle
+        document.getElementById('hintai-minimize').addEventListener('click', (e) => {
+            e.stopPropagation();
+            sidebar.classList.toggle('minimized');
+        });
+
+        // Click minimized circle to restore
+        sidebar.addEventListener('click', () => {
+            if (sidebar.classList.contains('minimized')) {
+                sidebar.classList.remove('minimized');
+            }
+        });
+    }
+
+    makeDraggable(element) {
+        /**
+         * Make sidebar draggable by header
+         */
+        const header = document.getElementById('hintai-header');
+        let isDragging = false;
+        let currentX;
+        let currentY;
+        let initialX;
+        let initialY;
+
+        header.addEventListener('mousedown', (e) => {
+            // Don't drag if clicking buttons
+            if (e.target.tagName === 'BUTTON') return;
+
+            isDragging = true;
+            initialX = e.clientX - element.offsetLeft;
+            initialY = e.clientY - element.offsetTop;
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                e.preventDefault();
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+
+                element.style.left = currentX + 'px';
+                element.style.top = currentY + 'px';
+                element.style.right = 'auto'; // Remove right positioning
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
         });
     }
 

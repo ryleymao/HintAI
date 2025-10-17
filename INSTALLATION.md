@@ -80,7 +80,31 @@ If you see this, the core RAG pipeline is working! ✅
 
 ## Step 4: Start the Backend Server
 
-Open a terminal and start the FastAPI server:
+### ⚡ **EASY WAY** (Recommended - runs in background!)
+
+```bash
+./start.sh
+```
+
+Done! Server runs in the background. You can close the terminal and it keeps running!
+
+**To stop:** `./stop.sh`
+
+---
+
+### 🐳 **DOCKER WAY** (Even easier if you have Docker)
+
+```bash
+docker-compose up -d
+```
+
+Done! Server runs in a container.
+
+**To stop:** `docker-compose down`
+
+---
+
+### 🔧 **MANUAL WAY** (For debugging)
 
 ```bash
 python3 backend/api/main.py
@@ -294,9 +318,11 @@ Understanding how it works:
 - If auto-analysis is distracting, turn it off in extension popup
 - Use manual analysis button instead
 
-### Collapse Sidebar
-- Click the "−" button in sidebar header to collapse
-- Gives you more screen space
+### Sidebar Controls
+- **Minimize:** Click the "_" button to shrink to a small circle (doesn't block screen!)
+- **Collapse:** Click the "−" button to hide hints but keep header visible
+- **Drag:** Click and drag the header to move sidebar anywhere
+- **Resize:** Drag bottom-right corner to resize (if your browser supports it)
 
 ### Progressive Hints
 - Level 1: Gentle nudge in the right direction
@@ -328,7 +354,9 @@ Found a bug? Have ideas? Open an issue on [GitHub](https://github.com/ryleymao/H
 3. Click "Remove"
 
 ### Stop Backend
-- Press `Ctrl+C` in the terminal running the server
+- If using start.sh: `./stop.sh`
+- If using Docker: `docker-compose down`
+- If running manually: Press `Ctrl+C` in the terminal
 
 ### Delete Files
 ```bash

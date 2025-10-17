@@ -22,6 +22,35 @@
     z-index: 10000;
     overflow: hidden;
     transition: all 0.3s ease;
+    resize: both;
+    min-width: 280px;
+    min-height: 200px;
+}
+
+.hintai-sidebar.minimized {
+    width: 60px !important;
+    height: 60px !important;
+    min-width: 60px;
+    min-height: 60px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.hintai-sidebar.minimized .hintai-content,
+.hintai-sidebar.minimized .hintai-toggle {
+    display: none;
+}
+
+.hintai-sidebar.minimized .hintai-header {
+    padding: 0;
+    border: none;
+    background: transparent;
+    height: 100%;
+    justify-content: center;
+}
+
+.hintai-sidebar.minimized .hintai-header h3 {
+    font-size: 24px;
 }
 
 .hintai-header {
@@ -31,6 +60,14 @@
     padding: 12px 16px;
     background: #2d2d2d;
     border-bottom: 1px solid #3c3c3c;
+    cursor: move;
+    user-select: none;
+}
+
+.hintai-header-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
 }
 
 .hintai-header h3 {

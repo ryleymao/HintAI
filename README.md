@@ -1,1 +1,1 @@
-# AI-Email-Cleaner
+HintAI

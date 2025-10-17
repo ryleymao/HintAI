@@ -73,6 +73,10 @@ class HintAIClient {
                     <span class="status-dot"></span>
                     <span id="hintai-status">Connecting...</span>
                 </div>
+                <div id="hintai-code-preview" class="hintai-section" style="display:none;">
+                    <h4>📝 Code Preview</h4>
+                    <div id="preview-text" style="font-size: 11px; color: #9ca3af; font-family: monospace; max-height: 60px; overflow: hidden;"></div>
+                </div>
                 <div id="hintai-analysis" class="hintai-section"></div>
                 <div id="hintai-hints" class="hintai-section"></div>
             </div>
@@ -96,36 +100,47 @@ class HintAIClient {
         // Minimize to circle
         document.getElementById('hintai-minimize').addEventListener('click', (e) => {
             e.stopPropagation();
-            sidebar.classList.toggle('minimized');
+            const isMinimized = sidebar.classList.toggle('minimized');
+            // Save state
+            localStorage.setItem('hintai-minimized', isMinimized);
         });
 
         // Click minimized circle to restore
-        sidebar.addEventListener('click', () => {
-            if (sidebar.classList.contains('minimized')) {
+        sidebar.addEventListener('click', (e) => {
+            if (sidebar.classList.contains('minimized') && e.target.tagName !== 'BUTTON') {
                 sidebar.classList.remove('minimized');
+                localStorage.setItem('hintai-minimized', false);
             }
         });
+
+        // Restore minimized state
+        if (localStorage.getItem('hintai-minimized') === 'true') {
+            sidebar.classList.add('minimized');
+        }
     }
 
     makeDraggable(element) {
         /**
-         * Make sidebar draggable by header
+         * Make sidebar draggable by header (even when minimized!)
          */
-        const header = document.getElementById('hintai-header');
         let isDragging = false;
         let currentX;
         let currentY;
         let initialX;
         let initialY;
 
-        header.addEventListener('mousedown', (e) => {
-            // Don't drag if clicking buttons
-            if (e.target.tagName === 'BUTTON') return;
+        const startDrag = (e) => {
+            // Don't drag if clicking buttons (unless minimized)
+            if (e.target.tagName === 'BUTTON' && !element.classList.contains('minimized')) return;
 
             isDragging = true;
             initialX = e.clientX - element.offsetLeft;
             initialY = e.clientY - element.offsetTop;
-        });
+            e.preventDefault();
+        };
+
+        // Allow dragging entire sidebar when minimized, or just header when expanded
+        element.addEventListener('mousedown', startDrag);
 
         document.addEventListener('mousemove', (e) => {
             if (isDragging) {
@@ -136,12 +151,31 @@ class HintAIClient {
                 element.style.left = currentX + 'px';
                 element.style.top = currentY + 'px';
                 element.style.right = 'auto'; // Remove right positioning
+
+                // Save position
+                localStorage.setItem('hintai-position', JSON.stringify({
+                    left: currentX,
+                    top: currentY
+                }));
             }
         });
 
         document.addEventListener('mouseup', () => {
             isDragging = false;
         });
+
+        // Restore saved position
+        const savedPos = localStorage.getItem('hintai-position');
+        if (savedPos) {
+            try {
+                const pos = JSON.parse(savedPos);
+                element.style.left = pos.left + 'px';
+                element.style.top = pos.top + 'px';
+                element.style.right = 'auto';
+            } catch (e) {
+                console.log('Could not restore position');
+            }
+        }
     }
 
     connectWebSocket() {
@@ -324,18 +358,38 @@ class HintAIClient {
         /**
          * Debounce code analysis
          *
-         * Wait 2 seconds after user stops typing before analyzing
+         * Wait 500ms after user stops typing before analyzing (faster!)
          */
 
         if (this.debounceTimer) {
             clearTimeout(this.debounceTimer);
         }
 
-        this.updateStatus('Analyzing...', 'analyzing');
+        // Show typing indicator immediately with code preview
+        this.updateStatus('Typing...', 'analyzing');
+        this.showCodePreview(code);
 
         this.debounceTimer = setTimeout(() => {
+            this.updateStatus('Analyzing...', 'analyzing');
             this.analyzeCode(code);
-        }, 2000);
+        }, 500); // Reduced from 2000ms to 500ms
+    }
+
+    showCodePreview(code) {
+        /**
+         * Show instant preview of code as user types
+         */
+        const preview = document.getElementById('hintai-code-preview');
+        const previewText = document.getElementById('preview-text');
+
+        if (code && code.length > 10) {
+            preview.style.display = 'block';
+            const lines = code.split('\n').slice(0, 3); // First 3 lines
+            const lineCount = code.split('\n').length;
+            previewText.textContent = lines.join('\n') + (lineCount > 3 ? '\n...' : '');
+        } else {
+            preview.style.display = 'none';
+        }
     }
 
     analyzeCode(code) {

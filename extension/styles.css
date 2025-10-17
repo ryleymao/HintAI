@@ -33,7 +33,13 @@
     min-width: 60px;
     min-height: 60px;
     border-radius: 50%;
-    cursor: pointer;
+    cursor: move;
+    transition: transform 0.2s;
+}
+
+.hintai-sidebar.minimized:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
 }
 
 .hintai-sidebar.minimized .hintai-content,

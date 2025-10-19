@@ -197,6 +197,11 @@ class HintAIClient {
                 isDragging = false;
                 element.style.cursor = element.classList.contains('minimized') ? 'move' : '';
 
+                // Snap to edges if minimized
+                if (element.classList.contains('minimized')) {
+                    this.snapToEdges(element);
+                }
+
                 // Store whether this was a drag or just a click
                 element.setAttribute('data-just-dragged', hasMoved ? 'true' : 'false');
             }
@@ -220,6 +225,51 @@ class HintAIClient {
                 console.log('Could not restore position');
             }
         }
+    }
+
+    snapToEdges(element) {
+        /**
+         * Snap minimized circle to screen edges
+         *
+         * Prevents it from going off-screen and magnetically snaps to edges
+         */
+        const rect = element.getBoundingClientRect();
+        const snapDistance = 20; // Snap if within 20px of edge
+
+        let x = parseInt(element.style.left) || rect.left;
+        let y = parseInt(element.style.top) || rect.top;
+
+        const width = rect.width;
+        const height = rect.height;
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+
+        // Snap to left edge
+        if (x < snapDistance) {
+            x = 10; // 10px padding from edge
+        }
+
+        // Snap to right edge
+        if (x + width > windowWidth - snapDistance) {
+            x = windowWidth - width - 10;
+        }
+
+        // Snap to top edge
+        if (y < snapDistance) {
+            y = 10;
+        }
+
+        // Snap to bottom edge
+        if (y + height > windowHeight - snapDistance) {
+            y = windowHeight - height - 10;
+        }
+
+        // Apply the snapped position
+        element.style.left = x + 'px';
+        element.style.top = y + 'px';
+
+        // Save the snapped position
+        localStorage.setItem('hintai-position', JSON.stringify({ left: x, top: y }));
     }
 
     connectWebSocket() {

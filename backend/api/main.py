@@ -108,9 +108,9 @@ class HintAIEngine:
 
         return {
             'analysis': {
-                'pattern': analysis['pattern'],
-                'complexity': analysis['complexity_estimate'],
-                'loop_count': analysis['loop_count']
+                'pattern': analysis.get('pattern', 'unknown'),
+                'complexity': analysis.get('complexity_estimate', 'Unknown'),
+                'loop_count': analysis.get('loop_count', 0)
             },
             'similarity_score': float(best_match_score),
             'matched_solution': {

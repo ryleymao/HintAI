@@ -124,45 +124,60 @@ class HintAIClient {
          * Make sidebar draggable by header (even when minimized!)
          */
         let isDragging = false;
-        let currentX;
-        let currentY;
-        let initialX;
-        let initialY;
+        let offsetX = 0;
+        let offsetY = 0;
 
-        const startDrag = (e) => {
+        const onMouseDown = (e) => {
             // Don't drag if clicking buttons (unless minimized)
-            if (e.target.tagName === 'BUTTON' && !element.classList.contains('minimized')) return;
+            if (e.target.tagName === 'BUTTON' && !element.classList.contains('minimized')) {
+                return;
+            }
 
             isDragging = true;
-            initialX = e.clientX - element.offsetLeft;
-            initialY = e.clientY - element.offsetTop;
+
+            // Get current position
+            const rect = element.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+
+            // Visual feedback
+            element.style.cursor = 'grabbing';
+            element.style.opacity = '0.8';
+
             e.preventDefault();
+            e.stopPropagation();
         };
 
-        // Allow dragging entire sidebar when minimized, or just header when expanded
-        element.addEventListener('mousedown', startDrag);
+        const onMouseMove = (e) => {
+            if (!isDragging) return;
 
-        document.addEventListener('mousemove', (e) => {
+            e.preventDefault();
+
+            const x = e.clientX - offsetX;
+            const y = e.clientY - offsetY;
+
+            // Update position
+            element.style.left = x + 'px';
+            element.style.top = y + 'px';
+            element.style.right = 'auto';
+            element.style.bottom = 'auto';
+
+            // Save position
+            localStorage.setItem('hintai-position', JSON.stringify({ left: x, top: y }));
+        };
+
+        const onMouseUp = () => {
             if (isDragging) {
-                e.preventDefault();
-                currentX = e.clientX - initialX;
-                currentY = e.clientY - initialY;
-
-                element.style.left = currentX + 'px';
-                element.style.top = currentY + 'px';
-                element.style.right = 'auto'; // Remove right positioning
-
-                // Save position
-                localStorage.setItem('hintai-position', JSON.stringify({
-                    left: currentX,
-                    top: currentY
-                }));
+                isDragging = false;
+                element.style.cursor = element.classList.contains('minimized') ? 'move' : '';
+                element.style.opacity = '1';
             }
-        });
+        };
 
-        document.addEventListener('mouseup', () => {
-            isDragging = false;
-        });
+        // Attach listeners
+        element.addEventListener('mousedown', onMouseDown);
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
 
         // Restore saved position
         const savedPos = localStorage.getItem('hintai-position');
@@ -172,6 +187,7 @@ class HintAIClient {
                 element.style.left = pos.left + 'px';
                 element.style.top = pos.top + 'px';
                 element.style.right = 'auto';
+                element.style.bottom = 'auto';
             } catch (e) {
                 console.log('Could not restore position');
             }

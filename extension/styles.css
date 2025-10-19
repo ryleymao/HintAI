@@ -43,8 +43,8 @@
 }
 
 .hintai-sidebar.minimized .hintai-content,
-.hintai-sidebar.minimized .hintai-toggle {
-    display: none;
+.hintai-sidebar.minimized .hintai-header-controls {
+    display: none !important;
 }
 
 .hintai-sidebar.minimized .hintai-header {

@@ -155,6 +155,40 @@ def reverseString(s):
             "Use two pointers: one at the start, one at the end. What should they do?",
             "Swap elements at left and right pointers, then move them toward each other."
         ]
+    },
+
+    # ===== ADD TWO NUMBERS =====
+    {
+        "problem": "Add Two Numbers",
+        "approach": "linked_list_traversal",
+        "description": "Traverse both linked lists simultaneously, tracking carry",
+        "code": """
+def addTwoNumbers(l1, l2):
+    dummy = ListNode(0)
+    current = dummy
+    carry = 0
+
+    while l1 or l2 or carry:
+        val1 = l1.val if l1 else 0
+        val2 = l2.val if l2 else 0
+
+        total = val1 + val2 + carry
+        carry = total // 10
+        current.next = ListNode(total % 10)
+
+        current = current.next
+        if l1: l1 = l1.next
+        if l2: l2 = l2.next
+
+    return dummy.next
+""",
+        "time_complexity": "O(max(m,n))",
+        "space_complexity": "O(max(m,n))",
+        "hints": [
+            "Think about how you add numbers by hand - you go digit by digit, right to left, and carry over when needed.",
+            "The linked lists already represent numbers in reverse order. Use a carry variable to track overflow.",
+            "Don't forget to handle the edge cases: different length lists, and a final carry after both lists end."
+        ]
     }
 ]
 

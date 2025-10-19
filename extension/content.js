@@ -62,10 +62,9 @@ class HintAIClient {
 
         sidebar.innerHTML = `
             <div class="hintai-header" id="hintai-header">
-                <h3>💡 HintAI</h3>
+                <h3 id="hintai-title">💡 HintAI</h3>
                 <div class="hintai-header-controls">
                     <button id="hintai-minimize" class="hintai-toggle" title="Minimize">_</button>
-                    <button id="hintai-toggle" class="hintai-toggle" title="Collapse">−</button>
                 </div>
             </div>
             <div class="hintai-content" id="hintai-content">
@@ -84,19 +83,19 @@ class HintAIClient {
         // Make draggable
         this.makeDraggable(sidebar);
 
-        // Toggle collapse
-        document.getElementById('hintai-toggle').addEventListener('click', (e) => {
-            e.stopPropagation();
-            const content = document.getElementById('hintai-content');
-            const isCollapsed = content.style.display === 'none';
-            content.style.display = isCollapsed ? 'block' : 'none';
-            document.getElementById('hintai-toggle').textContent = isCollapsed ? '−' : '+';
-        });
-
         // Minimize to circle
         document.getElementById('hintai-minimize').addEventListener('click', (e) => {
             e.stopPropagation();
             const isMinimized = sidebar.classList.toggle('minimized');
+            const title = document.getElementById('hintai-title');
+
+            // Change text based on state
+            if (isMinimized) {
+                title.textContent = 'HintAI';
+            } else {
+                title.textContent = '💡 HintAI';
+            }
+
             // Save state
             localStorage.setItem('hintai-minimized', isMinimized);
         });
@@ -105,6 +104,7 @@ class HintAIClient {
         sidebar.addEventListener('click', (e) => {
             if (sidebar.classList.contains('minimized') && e.target.tagName !== 'BUTTON') {
                 sidebar.classList.remove('minimized');
+                document.getElementById('hintai-title').textContent = '💡 HintAI';
                 localStorage.setItem('hintai-minimized', false);
             }
         });
@@ -112,6 +112,7 @@ class HintAIClient {
         // Restore minimized state
         if (localStorage.getItem('hintai-minimized') === 'true') {
             sidebar.classList.add('minimized');
+            document.getElementById('hintai-title').textContent = 'HintAI';
         }
     }
 

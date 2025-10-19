@@ -163,7 +163,6 @@ class HintAIClient {
 
             // Visual feedback
             element.style.cursor = 'grabbing';
-            element.style.opacity = '0.8';
 
             e.preventDefault();
             e.stopPropagation();
@@ -197,7 +196,6 @@ class HintAIClient {
             if (isDragging) {
                 isDragging = false;
                 element.style.cursor = element.classList.contains('minimized') ? 'move' : '';
-                element.style.opacity = '1';
 
                 // Store whether this was a drag or just a click
                 element.setAttribute('data-just-dragged', hasMoved ? 'true' : 'false');
@@ -460,7 +458,7 @@ class HintAIClient {
                 break;
 
             case 'hint':
-                this.displayHint(message.level, message.text);
+                this.displayHint(message.text);
                 break;
 
             case 'complete':
@@ -520,22 +518,16 @@ class HintAIClient {
         container.innerHTML += matchHtml;
     }
 
-    displayHint(level, text) {
+    displayHint(text) {
         const container = document.getElementById('hintai-hints');
 
-        // Clear previous hints if this is level 1
-        if (level === 1) {
-            container.innerHTML = '<h4>💡 Hints</h4>';
-        }
-
-        const hintElement = document.createElement('div');
-        hintElement.className = 'hint-item hint-level-' + level;
-        hintElement.innerHTML = `
-            <div class="hint-header">Level ${level}</div>
-            <div class="hint-text">${text}</div>
+        // Show single dynamic hint that updates as they type
+        container.innerHTML = `
+            <h4>💡 Current Hint</h4>
+            <div class="hint-item">
+                <div class="hint-text">${text}</div>
+            </div>
         `;
-
-        container.appendChild(hintElement);
     }
 }
 

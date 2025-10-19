@@ -174,6 +174,45 @@ async def analyze_code(request: Dict):
         return {"error": str(e)}
 
 
+def get_dynamic_hint(code_analysis: dict, hint_result: dict) -> str:
+    """
+    Generate a single dynamic hint based on current code state
+
+    This adapts to what the user is doing RIGHT NOW:
+    - If using inefficient approach → suggest optimization
+    - If using good approach → encourage and point out edge cases
+    - If making progress → guide next step
+    """
+    pattern = code_analysis.get('pattern', 'unknown')
+    loop_count = code_analysis.get('loop_count', 0)
+    matched_approach = hint_result['matched_solution']['approach']
+    similarity = hint_result['similarity_score']
+    hints = hint_result['hints']
+
+    # Very similar to optimal solution - they're on the right track!
+    if similarity > 0.8:
+        return hints[1] if len(hints) > 1 else hints[0]  # Give advanced hint
+
+    # Using nested loops - suggest optimization
+    if pattern == 'nested_loops' or loop_count >= 2:
+        return hints[0]  # Basic optimization hint
+
+    # Using hash map - they found the optimization!
+    if pattern == 'hash_map' or pattern == 'hash_set':
+        return "Great! You're using the right approach. " + (hints[1] if len(hints) > 1 else hints[0])
+
+    # Single pass - depends on the problem
+    if pattern == 'single_pass':
+        return hints[0]
+
+    # No clear pattern yet or just starting
+    if pattern in ['no_iteration', 'unknown', 'invalid']:
+        return "Start by thinking about the problem structure. " + hints[0]
+
+    # Default: first hint
+    return hints[0]
+
+
 @app.websocket("/ws/hints")
 async def websocket_hints(websocket: WebSocket):
     """
@@ -226,13 +265,13 @@ async def websocket_hints(websocket: WebSocket):
                 "similarity": result['similarity_score']
             })
 
-            # Stream hints progressively (Socratic method!)
-            for level, hint_text in enumerate(result['hints'], 1):
-                await websocket.send_json({
-                    "type": "hint",
-                    "level": level,
-                    "text": hint_text
-                })
+            # Send dynamic hint based on current approach
+            # Pick the right hint based on what they're doing
+            hint_text = get_dynamic_hint(result['analysis'], result)
+            await websocket.send_json({
+                "type": "hint",
+                "text": hint_text
+            })
 
             # Signal completion
             await websocket.send_json({

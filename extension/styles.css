@@ -107,6 +107,8 @@
     padding: 16px;
     max-height: calc(100vh - 180px);
     overflow-y: auto;
+    user-select: text;
+    cursor: auto;
 }
 
 /* Custom scrollbar */

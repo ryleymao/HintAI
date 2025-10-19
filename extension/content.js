@@ -73,10 +73,6 @@ class HintAIClient {
                     <span class="status-dot"></span>
                     <span id="hintai-status">Connecting...</span>
                 </div>
-                <div id="hintai-code-preview" class="hintai-section" style="display:none;">
-                    <h4>📝 Code Preview</h4>
-                    <div id="preview-text" style="font-size: 11px; color: #9ca3af; font-family: monospace; max-height: 60px; overflow: hidden;"></div>
-                </div>
                 <div id="hintai-analysis" class="hintai-section"></div>
                 <div id="hintai-hints" class="hintai-section"></div>
             </div>
@@ -128,9 +124,19 @@ class HintAIClient {
         let offsetY = 0;
 
         const onMouseDown = (e) => {
-            // Don't drag if clicking buttons (unless minimized)
-            if (e.target.tagName === 'BUTTON' && !element.classList.contains('minimized')) {
+            // Only drag from header or when minimized
+            const isHeader = e.target.closest('.hintai-header') || element.classList.contains('minimized');
+            const isButton = e.target.tagName === 'BUTTON';
+
+            // Don't drag if:
+            // - Clicking a button (unless minimized)
+            // - Clicking inside content area (to allow text selection)
+            if (isButton && !element.classList.contains('minimized')) {
                 return;
+            }
+
+            if (!isHeader && !element.classList.contains('minimized')) {
+                return; // Allow text selection in content
             }
 
             isDragging = true;
@@ -381,31 +387,13 @@ class HintAIClient {
             clearTimeout(this.debounceTimer);
         }
 
-        // Show typing indicator immediately with code preview
+        // Show typing indicator immediately
         this.updateStatus('Typing...', 'analyzing');
-        this.showCodePreview(code);
 
         this.debounceTimer = setTimeout(() => {
             this.updateStatus('Analyzing...', 'analyzing');
             this.analyzeCode(code);
         }, 500); // Reduced from 2000ms to 500ms
-    }
-
-    showCodePreview(code) {
-        /**
-         * Show instant preview of code as user types
-         */
-        const preview = document.getElementById('hintai-code-preview');
-        const previewText = document.getElementById('preview-text');
-
-        if (code && code.length > 10) {
-            preview.style.display = 'block';
-            const lines = code.split('\n').slice(0, 3); // First 3 lines
-            const lineCount = code.split('\n').length;
-            previewText.textContent = lines.join('\n') + (lineCount > 3 ? '\n...' : '');
-        } else {
-            preview.style.display = 'none';
-        }
     }
 
     analyzeCode(code) {

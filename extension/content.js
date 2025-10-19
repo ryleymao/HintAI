@@ -100,13 +100,21 @@ class HintAIClient {
             localStorage.setItem('hintai-minimized', isMinimized);
         });
 
-        // Click minimized circle to restore
+        // Click minimized circle to restore (but not if they just dragged it!)
         sidebar.addEventListener('click', (e) => {
-            if (sidebar.classList.contains('minimized') && e.target.tagName !== 'BUTTON') {
+            // Check if this was a drag or a real click
+            const justDragged = sidebar.getAttribute('data-just-dragged') === 'true';
+
+            if (sidebar.classList.contains('minimized') &&
+                e.target.tagName !== 'BUTTON' &&
+                !justDragged) {
                 sidebar.classList.remove('minimized');
                 document.getElementById('hintai-title').textContent = '💡 HintAI';
                 localStorage.setItem('hintai-minimized', false);
             }
+
+            // Reset the flag
+            sidebar.setAttribute('data-just-dragged', 'false');
         });
 
         // Restore minimized state
@@ -121,8 +129,11 @@ class HintAIClient {
          * Make sidebar draggable by header (even when minimized!)
          */
         let isDragging = false;
+        let hasMoved = false; // Track if actually moved during drag
         let offsetX = 0;
         let offsetY = 0;
+        let startX = 0;
+        let startY = 0;
 
         const onMouseDown = (e) => {
             // Only drag from header or when minimized
@@ -141,11 +152,14 @@ class HintAIClient {
             }
 
             isDragging = true;
+            hasMoved = false;
 
             // Get current position
             const rect = element.getBoundingClientRect();
             offsetX = e.clientX - rect.left;
             offsetY = e.clientY - rect.top;
+            startX = e.clientX;
+            startY = e.clientY;
 
             // Visual feedback
             element.style.cursor = 'grabbing';
@@ -163,6 +177,12 @@ class HintAIClient {
             const x = e.clientX - offsetX;
             const y = e.clientY - offsetY;
 
+            // Check if actually moved (more than 5px)
+            const moved = Math.abs(e.clientX - startX) > 5 || Math.abs(e.clientY - startY) > 5;
+            if (moved) {
+                hasMoved = true;
+            }
+
             // Update position
             element.style.left = x + 'px';
             element.style.top = y + 'px';
@@ -178,6 +198,9 @@ class HintAIClient {
                 isDragging = false;
                 element.style.cursor = element.classList.contains('minimized') ? 'move' : '';
                 element.style.opacity = '1';
+
+                // Store whether this was a drag or just a click
+                element.setAttribute('data-just-dragged', hasMoved ? 'true' : 'false');
             }
         };
 
@@ -460,15 +483,23 @@ class HintAIClient {
 
     displayAnalysis(analysis) {
         const container = document.getElementById('hintai-analysis');
+
+        // Handle invalid/unknown patterns with friendly messages
+        const pattern = analysis.pattern === 'invalid' ? 'No code yet' :
+                       analysis.pattern === 'unknown' ? 'Custom approach' :
+                       analysis.pattern;
+
+        const complexity = analysis.complexity === 'Unknown' ? 'Not analyzed' : analysis.complexity;
+
         container.innerHTML = `
             <h4>📊 Code Analysis</h4>
             <div class="analysis-item">
                 <span class="label">Pattern:</span>
-                <span class="value">${analysis.pattern}</span>
+                <span class="value">${pattern}</span>
             </div>
             <div class="analysis-item">
                 <span class="label">Complexity:</span>
-                <span class="value">${analysis.complexity}</span>
+                <span class="value">${complexity}</span>
             </div>
         `;
     }
